@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="CTRL-Z lets a code agent predict physical outcomes and revise robot actions before execution." />
+    <meta property="og:title" content="CTRL-Z" />
+    <meta property="og:description" content="Code Agent Trial Robot Actions and Reason with Latent World Model Z." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/media/paper/framework-overview.png" />
+    <title>CTRL-Z — Project Page</title>
+    <link rel="icon" href="assets/media/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="hero" id="top">
+      <div class="hero-glow hero-glow-one" aria-hidden="true"></div>
+      <div class="hero-glow hero-glow-two" aria-hidden="true"></div>
+      <div class="page-shell hero-content">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> Code agents with physical foresight</div>
+        <h1>
+          <span class="ctrl-wordmark">CTRL-Z</span>
+          <span class="title-break">Code Agent Trial Robot Actions and</span>
+          <span class="title-break">Reason with Latent World Model <i>Z</i></span>
+        </h1>
+        <p class="authors"><span>Anonymous authors</span></p>
+        <p class="hero-summary">
+          A code agent that can <strong>trial robot actions in imagination</strong>, inspect their predicted
+          physical consequences, and revise its program before execution.
+        </p>
+        <div class="hero-actions" aria-label="Page shortcuts">
+          <a class="pill primary" href="#framework">Method</a>
+          <a class="pill" href="#results">Experiments</a>
+          <a class="pill" href="#real-world">Real robot</a>
+        </div>
+        <div class="status-note">
+          <span>Anonymous project page</span>
+          Author information is intentionally withheld.
+        </div>
+      </div>
+    </header>
+
+    <nav class="overview-nav" aria-label="Page sections">
+      <div class="page-shell overview-scroll">
+        <a href="#motivation">Motivation</a>
+        <a href="#abstract">Abstract</a>
+        <a href="#framework">Framework</a>
+        <a href="#sop">Structured objects</a>
+        <a href="#results">Experiments</a>
+        <a href="#real-world">Real robot</a>
+      </div>
+    </nav>
+
+    <main id="main">
+      <section class="section page-shell" id="motivation">
+        <div class="section-heading centered">
+          <p class="kicker">Why CTRL-Z?</p>
+          <h2>From code generation to physical foresight</h2>
+          <p>Standard code agents can produce executable policies, but they do not know what those programs will do in the physical world.</p>
+        </div>
+        <figure class="paper-figure hero-figure">
+          <img src="assets/media/paper/intro-revision.png" alt="Comparison between conventional code-as-policy and CTRL-Z, which predicts and revises robot actions before execution" />
+          <figcaption>
+            <strong>Figure 1.</strong> Predictive program revision before execution. (a) Execution-feedback code agents revise programs based on observed execution outcomes. (b) Visuomotor policies and visual-goal planners derive actions from visual observations. (c) Our framework, CTRL-Z, connects code agents and world models through Structured Object Programs (SOPs). RGB observations and SOP-rendered geometry jointly support dual-stream prediction, while a physical readout converts predicted latents into object-part states accessible to the agent. These predictions enable the agent to evaluate candidate interactions and revise action programs before executing the selected action.
+          </figcaption>
+        </figure>
+        <div class="comparison-grid">
+          <article>
+            <span class="card-number">01</span>
+            <h3>Generate</h3>
+            <p>The code agent writes a candidate policy from the task instruction and a structured object description.</p>
+          </article>
+          <article>
+            <span class="card-number">02</span>
+            <h3>Imagine</h3>
+            <p>An action-conditioned latent world model predicts future RGB appearance, geometry, and physical part state.</p>
+          </article>
+          <article class="accent-card">
+            <span class="card-number">03</span>
+            <h3>Revise</h3>
+            <p>The agent reads the predicted state and rewrites the program when the imagined outcome does not satisfy the task.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section soft-section" id="abstract">
+        <div class="narrow-shell">
+          <div class="section-heading centered">
+            <h2>Abstract</h2>
+          </div>
+          <p class="lead-copy">
+            Code-as-policy approaches translate language instructions into executable programs, enabling compositional task planning and reuse of robot skills. However, generating a valid program don’t establish whether a candidate action will produce the desired physical change. Action-conditioned world models offer a way to anticipate such changes, but their latent predictions are not directly expressed in the language of executable programs generated by code agent. To address these questions, we propose a closed-loop system in which a code agent can read, reason, make prediction and update object physical parameters based on those predictions, and generate actions accordingly. To make it readable for the agent, we build Structured Object Program, a compositional program describing object primitive geometry, physical parameters, interaction properties and rendering object programs into geometric views. For the prediction system, we propose a dual-stream world model that accepts RGB images and rendered geometric views as input while predicting future visual and geometric latent variables. Physical parameters regarding the dynamic parts of the object are decoded from these predicted latents and fed back to the agent, enabling it to understand how its current actions affect the object’s future properties. Experiments across manipulation tasks and object generalization settings show that our framework improves task success, cross-object generalization, and agent interaction efficiency.
+          </p>
+        </div>
+      </section>
+
+      <section class="section page-shell" id="framework">
+        <div class="split-heading">
+          <div><p class="kicker">Framework</p><h2>Predict, interpret, and correct</h2></div>
+          <p>The model separates visual appearance from physical structure, then reconnects both predictions through a state readout the code agent can understand.</p>
+        </div>
+        <figure class="paper-figure result-figure plain-figure">
+          <img src="assets/media/paper/framework-overview.png" alt="CTRL-Z framework with a code agent, structured object program, dual-stream latent world model, physical readout, and robot execution" />
+        </figure>
+        <div class="framework-flow" aria-label="Three-stage CTRL-Z workflow">
+          <article><span>1</span><h3>Ground the scene</h3><p>Instantiate an SOP with semantic parts, geometry, kinematics, states, and affordances.</p></article>
+          <b class="flow-arrow" aria-hidden="true">→</b>
+          <article><span>2</span><h3>Roll out candidates</h3><p>Condition the dual-stream world model on proposed actions and predict future RGB and geometry latents.</p></article>
+          <b class="flow-arrow" aria-hidden="true">→</b>
+          <article><span>3</span><h3>Read and revise</h3><p>Decode dynamic part state and reward, then update the program before executing it.</p></article>
+        </div>
+      </section>
+
+      <section class="section dark-section" id="sop">
+        <div class="page-shell two-column-feature">
+          <div>
+            <p class="kicker light">Structured Object Programs</p>
+            <h2>Objects become editable, executable physical descriptions</h2>
+            <p class="dark-copy">An SOP pairs semantic structure with geometric templates and manipulation functions. It gives the code agent a language for physical reasoning and gives the world model an explicit geometry stream.</p>
+            <div class="model-detail-grid">
+              <article><strong>Semantic parts</strong><span>door, handle, hinge, container</span></article>
+              <article><strong>Physical state</strong><span>pose, joint value, limits, contact</span></article>
+              <article><strong>Affordances</strong><span>grasp, pull, rotate, place</span></article>
+            </div>
+          </div>
+          <div class="code-window" aria-label="Illustrative structured object program">
+            <div class="code-title"><span></span><span></span><span></span><b>microwave_sop.py</b></div>
+            <pre><code><span class="code-key">class</span> Microwave(SOP):
+  parts = [Body(), Door(), Handle()]
+
+  door = RevoluteJoint(
+    axis=<span class="code-value">"vertical"</span>,
+    limits=self.door_limits
+  )
+
+  <span class="code-key">def</span> open(self, grasp, angle):
+    grasp(self.handle)
+    rotate(self.door, angle)</code></pre>
+            <p>Illustrative excerpt — the final implementation link can be added after release.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section page-shell" id="results">
+        <div class="section-heading centered">
+          <p class="kicker">Experiments</p>
+          <h2>Stronger task success across manipulation families</h2>
+          <p>CTRL-Z is evaluated on articulated-object interaction, pick-and-place, precision operation, predictive evaluation, generalization, and real-robot transfer.</p>
+        </div>
+        <div class="result-highlights">
+          <article><span>Open articulated objects</span><strong>55.0%</strong><small>π0.5 + WM-RL</small></article>
+          <article><span>Pick and place</span><strong>65.8%</strong><small>π0.5 + WM-RL</small></article>
+          <article><span>Precision operation</span><strong>57.9%</strong><small>π0.5 + WM-RL</small></article>
+        </div>
+
+        <div class="table-card">
+          <div class="table-heading"><div><p class="kicker">Task success</p><h3>Comparison with policy, RL, world-model, and code-agent baselines</h3></div><span>Success rate (%) ↑</span></div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Method</th><th>Open articulated objects</th><th>Pick and place</th><th>Precision operation</th></tr></thead>
+              <tbody>
+                <tr><td>Diffusion Policy</td><td>15.4 ± 1.7</td><td>24.6 ± 0.6</td><td>18.8 ± 1.1</td></tr>
+                <tr><td>Online PPO</td><td>23.9 ± 1.2</td><td>31.3 ± 0.8</td><td>25.7 ± 1.3</td></tr>
+                <tr><td>Online TD-MPC2</td><td>25.5 ± 1.0</td><td>34.6 ± 0.6</td><td>29.1 ± 0.9</td></tr>
+                <tr><td>DreamerV3</td><td>30.6 ± 1.1</td><td>39.0 ± 0.5</td><td>32.9 ± 1.4</td></tr>
+                <tr><td>π0.5</td><td>38.2 ± 1.3</td><td>47.1 ± 0.9</td><td>39.4 ± 1.2</td></tr>
+                <tr><td>Fast-WAM</td><td>37.8 ± 0.8</td><td>48.4 ± 0.7</td><td>39.2 ± 1.3</td></tr>
+                <tr><td>DreamZero</td><td>34.1 ± 1.4</td><td>43.2 ± 1.0</td><td>33.5 ± 1.5</td></tr>
+                <tr class="strongest-row"><td>CaP-Agent0</td><td>38.1 ± 0.9</td><td>47.5 ± 0.4</td><td>41.6 ± 0.8</td></tr>
+                <tr class="ours-row"><td>CTRL-Z · code-generated</td><td><strong>46.1 ± 1.5</strong></td><td><strong>53.4 ± 1.0</strong></td><td><strong>49.8 ± 1.4</strong></td></tr>
+                <tr class="ours-row"><td>CTRL-Z · π0.5, no additional training</td><td><strong>50.6 ± 0.9</strong></td><td><strong>61.3 ± 0.5</strong></td><td><strong>54.2 ± 1.7</strong></td></tr>
+                <tr class="ours-row"><td>CTRL-Z · π0.5 + WM-RL</td><td><strong>55.0 ± 0.4</strong></td><td><strong>65.8 ± 0.5</strong></td><td><strong>57.9 ± 1.1</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="result-story-grid">
+          <article class="result-story">
+            <p class="kicker">Predictive evaluation</p>
+            <h3>Dual-stream prediction makes revision useful</h3>
+            <p>With GPT-5.6-Sol as the code backbone, direct execution succeeds in only 5.1% of trials. RGB-only prediction reaches 26.5%, while the full dual-stream model reaches 45.2%, close to the 46.4% oracle.</p>
+            <div class="compact-comparison" aria-label="Predictive evaluation success rates">
+              <div><span>Direct</span><i style="--bar: 11%"></i><b>5.1</b></div>
+              <div><span>Current SOP</span><i style="--bar: 13%"></i><b>5.8</b></div>
+              <div><span>RGB WM</span><i style="--bar: 57%"></i><b>26.5</b></div>
+              <div class="accent-bar"><span>Dual stream</span><i style="--bar: 97%"></i><b>45.2</b></div>
+              <div><span>Oracle</span><i style="--bar: 100%"></i><b>46.4</b></div>
+            </div>
+          </article>
+          <article class="result-story">
+            <p class="kicker">Interaction efficiency</p>
+            <h3>Fewer attempts to solve the task</h3>
+            <p>The dual-stream configuration reduces the mean number of attempts from 29.8 with current SOP priors to 20.5, while the oracle requires 18.6 attempts.</p>
+            <div class="big-stat"><strong>20.5</strong><span>mean attempts<br />with dual-stream WM</span></div>
+          </article>
+        </div>
+
+        <figure class="paper-figure result-figure">
+          <img src="assets/media/paper/generalization-results.png" alt="Generalization and skill refinement experiment charts" />
+          <figcaption><strong>Figure 3.</strong> Generalization and experience reuse with same GPT-5.6-Sol (medium). (a) Manipulation performance across object generalization settings. (b) Effects of WM-based demonstration selection, SOP context, and WM-guided skill refinement. All configurations in (b) use expert demonstrations; SOP context provides the objects’ structural information. Bars show mean success rates, and error bars indicate standard deviations.</figcaption>
+        </figure>
+        <div class="finding-grid">
+          <article><strong>33.8%</strong><span>Unseen composition success with dual-stream WM</span></article>
+          <article><strong>30.6%</strong><span>Unseen category success with dual-stream WM</span></article>
+          <article><strong>27.8%</strong><span>Geometry and kinematics OOD success</span></article>
+          <article><strong>+18.0 pp</strong><span>Dual-stream gain over RGB-only on OOD</span></article>
+        </div>
+
+        <figure class="paper-figure result-figure">
+          <img src="assets/media/paper/prediction-error.png" alt="Moving-part position and rotation errors across rollout steps" />
+          <figcaption><strong>Figure 4.</strong> Moving-part position (left) and rotation (right) errors across rollout steps. Lines show mean errors, and shaded bands indicate standard deviations.</figcaption>
+        </figure>
+      </section>
+
+      <section class="section soft-section" id="real-world">
+        <div class="page-shell">
+          <div class="split-heading">
+            <div><p class="kicker">Real robot</p><h2>Physical-world evaluation</h2></div>
+            <p>Each task uses 100 trials across 10 initial poses. CTRL-Z improves both block stacking and drawer opening without requiring online trial-and-error on the robot.</p>
+          </div>
+          <div class="real-world-scoreboard">
+            <div class="score-labels"><span>Method</span><span>Block stacking</span><span>Drawer opening</span></div>
+            <div><strong>π0.5</strong><span>56%</span><span>54%</span></div>
+            <div><strong>Fast-WAM</strong><span>47%</span><span>42%</span></div>
+            <div class="winner"><strong>CTRL-Z</strong><span>69%</span><span>63%</span></div>
+          </div>
+          <div class="real-world-grid">
+            <figure class="paper-figure">
+              <img src="assets/media/paper/real-robot-stacking.png" alt="Real robot block stacking sequence" />
+              <figcaption><strong>Figure 5.</strong> Real-world block stacking: green on red, followed by blue on top. Recorded keyframes and illustrative API pseudocode show structural grounding, predictive evaluation, execution, and observation-based updates.</figcaption>
+            </figure>
+            <figure class="paper-figure">
+              <img src="assets/media/paper/real-robot-drawer.png" alt="Real robot drawer opening sequence" />
+              <figcaption><strong>Figure 6.</strong> Real-world drawer opening. Recorded keyframes and illustrative API pseudocode show handle grounding, predictive evaluation of pulling actions, and updates from observed motion. World-model feedback is schematic.</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="section conclusion-section">
+        <div class="narrow-shell centered">
+          <p class="kicker">Takeaway</p>
+          <h2>CTRL-Z gives code agents a chance to think physically before acting.</h2>
+          <p class="lead-copy">By turning imagined rollouts into interpretable physical feedback, the method closes the gap between a syntactically valid robot program and an action that is likely to work.</p>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <div class="page-shell footer-row">
+        <div><strong>CTRL-Z</strong><span>Project page</span></div>
+        <p>Anonymous project page.</p>
+        <a href="#top">Back to top ↑</a>
+      </div>
+    </footer>
+  </body>
+</html>
